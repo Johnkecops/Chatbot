@@ -1,0 +1,12 @@
+1. Create environment
+>> conda env create -f my_conda_env.yml
+
+2. Activate environment
+>> conda activate tf-keras-chatbot
+
+3. Open & run files
+	- Training, testing, saving model: ANN_Chatbot_Note.ipynb
+		- dataset: data_tutorial.csv
+	- Using model for prediction: ANN_Chatbot_Model.ipynb
+		- model file: chatbot_model1.h5
+		- source code for chatModel: chatbot_model.py
