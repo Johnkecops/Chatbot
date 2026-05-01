@@ -1,0 +1,48 @@
+question,Response
+I have chest pain and shortness of breath,You should consult a Cardiologist (SpJP) immediately. Chest pain with shortness of breath may indicate a cardiac condition. Seek emergency care if pain is severe or radiates to the arm or jaw.
+My chest feels tight and I feel faint,These symptoms may be cardiac in origin. Please visit a Cardiologist (SpJP) as soon as possible. Do not ignore sudden faintness combined with chest tightness.
+I have persistent headache that won't go away,A Neurologist (SpS) can help evaluate persistent headaches. If the headache is sudden and severe or accompanied by vision changes or weakness, seek emergency care immediately.
+I have been having trouble speaking and walking,These are potential stroke warning signs. Go to an emergency room immediately. A Neurologist (SpS) will assess and manage this condition.
+I fractured my bone in an accident,Please see an Orthopedic Surgeon (SpOT) for fracture management. X-rays and proper immobilization are essential for recovery.
+My back is hurting a lot and I feel weak,Back pain with general weakness may need evaluation by an Internist (SpPD) or Orthopedic Surgeon (SpOT) depending on the cause. An Internist can first assess whether it is systemic or structural.
+I have a skin rash and skin infection,A Dermatologist (SpKK) specializes in skin conditions including infections, rashes, and lesions. Please schedule an appointment for proper diagnosis and treatment.
+My vision is blurry and I have eye problems,Please consult an Ophthalmologist (SpM) for any vision-related issues. Early assessment can prevent further deterioration.
+I have been having high fever and diarrhea,Fever with diarrhea may indicate a gastrointestinal infection. An Internist (SpPD) can assess and manage these symptoms. Stay hydrated while awaiting your appointment.
+I feel nauseous and I keep vomiting,Persistent vomiting can have many causes. An Internist (SpPD) or Gastroenterologist can help. If vomiting is accompanied by blood or severe pain, seek emergency care.
+I have a stomachache and gastric problems,Stomach pain and gastric issues are commonly managed by an Internist (SpPD). A gastroscopy may be needed to diagnose underlying conditions like gastric ulcers.
+I have shortness of breath and cough,Respiratory symptoms such as shortness of breath and cough should be evaluated by a Pulmonologist (Paru). Conditions like asthma, bronchitis, or pneumonia may be the cause.
+I have chronic cough and breathing difficulty,A Pulmonologist (Paru) specializes in respiratory diseases. Chronic cough with breathing difficulty may indicate COPD, asthma, or other lung conditions requiring proper diagnosis.
+I cut myself and the wound is not healing,A General Surgeon (SpB) can help with wound management. If the cut is deep or infected, please seek medical care promptly to avoid complications.
+I have something stuck in my throat,A foreign object stuck in the throat is an ENT (THT) emergency. Please go to an ENT specialist or emergency room immediately.
+My ear hurts and I have difficulty hearing,Ear pain and hearing problems are managed by an ENT specialist (THT). Conditions such as ear infection or fluid buildup may be the cause.
+I have sore throat and nasal congestion,These are common ENT conditions. An ENT Specialist (THT) can assess whether the cause is infection, allergy, or structural issue.
+I have been diagnosed with hypertension,Hypertension is commonly managed by an Internist (SpPD) or Cardiologist (SpJP) depending on severity. Regular monitoring and medication compliance are important.
+I am a diabetic patient and need medical advice,Diabetes management is handled by an Internist (SpPD). Regular monitoring of blood glucose, HbA1c, and organ function is essential for long-term health.
+I have liver disease and need a specialist,Liver diseases are managed by an Internist (SpPD) with hepatology expertise. Conditions such as hepatitis, cirrhosis, or fatty liver need proper workup and management.
+I had a stroke before and want a follow up,Stroke survivors should follow up with a Neurologist (SpS). Rehabilitation and secondary prevention are key to reducing recurrence risk.
+I have been diagnosed with a tumor,Tumor management requires an Internist (SpPD) or Oncologist depending on the type and stage. Please consult your referring doctor for specialist referral.
+I have respiratory disease and breathing problems,Respiratory disease is managed by a Pulmonologist (Paru). Proper lung function tests and imaging will help determine the best treatment plan.
+I have heart disease and chest discomfort,Heart disease with chest discomfort requires evaluation by a Cardiologist (SpJP). Do not delay consultation if symptoms are worsening.
+Which doctor should I see for a broken arm,For a broken arm, please see an Orthopedic Surgeon (SpOT). They will perform imaging and decide on casting or surgical intervention.
+Who treats skin infections,Skin infections are treated by a Dermatologist (SpKK). Bacterial, fungal, and viral skin infections each require different treatment approaches.
+What specialist handles eye problems,Eye problems are handled by an Ophthalmologist (SpM). Regular eye checkups are recommended especially for diabetic and hypertensive patients.
+Which specialist treats lung disease,Lung and respiratory diseases are treated by a Pulmonologist (Paru). They manage conditions such as asthma, COPD, pneumonia, and tuberculosis.
+What doctor handles stomach problems,Stomach and digestive problems are managed by an Internist (SpPD) or Gastroenterologist. Symptoms like pain, bloating, and acid reflux are common presenting complaints.
+Who should I see for ear and nose problems,Ear, nose, and throat problems are handled by an ENT Specialist (THT). These include ear infections, sinusitis, tonsillitis, and hearing problems.
+I have cold sweats and feel faint often,Cold sweats with fainting episodes may indicate a cardiovascular or neurological problem. Please see an Internist (SpPD) for initial workup to determine the right specialist.
+I feel very weak and tired all the time,Persistent weakness and fatigue can have many causes including anemia, thyroid issues, or chronic infection. An Internist (SpPD) is the best starting point for evaluation.
+I have trouble seeing at night,Night vision problems should be assessed by an Ophthalmologist (SpM). It may indicate retinal changes, cataracts, or vitamin A deficiency.
+My joints are swollen and painful,Joint pain and swelling may indicate arthritis or other rheumatic diseases. An Internist (SpPD) with rheumatology focus or an Orthopedic Surgeon (SpOT) can help.
+I have a mole that is changing color,A changing mole may be a sign of skin cancer. Please consult a Dermatologist (SpKK) immediately for evaluation and possible biopsy.
+I keep getting headaches when I wake up,Morning headaches can be related to sleep apnea, hypertension, or neurological causes. A Neurologist (SpS) can conduct appropriate evaluations.
+Who can help with dizziness and fainting,Dizziness and fainting can be caused by cardiovascular, neurological, or inner ear issues. An Internist (SpPD) can do initial workup and refer to the appropriate specialist.
+I have been having back pain for months,Chronic back pain requires evaluation by an Orthopedic Surgeon (SpOT) or a Neurologist (SpS) if nerve involvement is suspected. Imaging may be needed.
+What is SpJP,SpJP stands for Spesialis Jantung dan Pembuluh Darah, meaning Cardiologist. They specialize in heart and vascular diseases.
+What is SpPD,SpPD stands for Spesialis Penyakit Dalam, meaning Internist. They manage a wide range of internal medicine conditions including metabolic and infectious diseases.
+What is SpS,SpS stands for Spesialis Saraf, meaning Neurologist. They treat diseases of the brain, spinal cord, and peripheral nerves.
+What is SpOT,SpOT stands for Spesialis Ortopedi dan Traumatologi, meaning Orthopedic Surgeon. They handle bone, joint, and musculoskeletal conditions.
+What is THT,THT stands for Telinga Hidung Tenggorokan, meaning ENT Specialist. They manage diseases of the ear, nose, and throat.
+What is SpKK,SpKK stands for Spesialis Kulit dan Kelamin, meaning Dermatologist. They treat skin, hair, nail, and sexually transmitted infections.
+What is SpM,SpM stands for Spesialis Mata, meaning Ophthalmologist. They diagnose and treat all eye conditions.
+What is Paru,Paru refers to Spesialis Paru, meaning Pulmonologist. They manage lung and respiratory tract diseases.
+What is SpB,SpB stands for Spesialis Bedah, meaning General Surgeon. They perform surgical procedures for a variety of conditions.
