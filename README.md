@@ -127,3 +127,5 @@ Shiloputra, A. F., Darmawan, J. T., Zahra, S. L., Sugiharto, S., Pricillia, V., 
 ## Disclaimer
 
 This tool is for **research and educational purposes only**. It does not constitute medical advice and must not be used as a substitute for professional clinical judgment.
+
+**AI Assistance Disclaimer**: This codebase was developed with the assistance of Claude Code. While the AI provided code generation, debugging, and structural support, the human developer maintains full responsibility for reviewing, testing, and maintaining all content and functionality.
