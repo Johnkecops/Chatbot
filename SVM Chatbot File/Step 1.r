@@ -1,4 +1,3 @@
-setwd("C:/users/Ryan/rstudio data")
 data <- read.csv('read.csv')
 
 # 1. Convert training questions into document term matrix (sparse matrix with 1s and 0s)

@@ -52,6 +52,9 @@ SYMPTOM_DISPLAY = {
     "Trouble_in_speaking_seeingwalking"   : "Speech / Vision / Walking Trouble",
     "Vomit"                               : "Vomiting",
     "Stomachache"                         : "Stomachache",
+}
+
+HISTORY_DISPLAY = {
     "Hypertension"                        : "Hypertension (pre-existing)",
     "Diabetes"                            : "Diabetes (pre-existing)",
     "Heart_disease"                       : "Heart Disease (pre-existing)",
@@ -62,8 +65,8 @@ SYMPTOM_DISPLAY = {
     "Gastric"                             : "Gastric Disease (pre-existing)",
 }
 
-SYMPTOMS_COLS   = list(SYMPTOM_DISPLAY.keys())[:18]   # acute symptoms
-HISTORY_COLS    = list(SYMPTOM_DISPLAY.keys())[18:]   # medical history
+SYMPTOMS_COLS = list(SYMPTOM_DISPLAY.keys())
+HISTORY_COLS  = list(HISTORY_DISPLAY.keys())
 
 
 # ── Model loaders (cached) ─────────────────────────────────────────────────────
@@ -82,14 +85,19 @@ def load_svm():
     from sklearn.svm import LinearSVC
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.pipeline import Pipeline
+    from sklearn.model_selection import train_test_split
 
     df = pd.read_csv(str(SVM_CSV))
+    X_train, X_test, y_train, y_test = train_test_split(
+        df["question"], df["Response"], test_size=0.2, random_state=42
+    )
     pipeline = Pipeline([
         ("tfidf", TfidfVectorizer(stop_words="english", ngram_range=(1, 2))),
         ("svm",   LinearSVC(C=1.0, max_iter=2000)),
     ])
-    pipeline.fit(df["question"], df["Response"])
-    return pipeline
+    pipeline.fit(X_train, y_train)
+    holdout_accuracy = pipeline.score(X_test, y_test)
+    return pipeline, holdout_accuracy
 
 
 # ── ANN prediction ─────────────────────────────────────────────────────────────
@@ -174,7 +182,7 @@ if model_choice.startswith("🧠"):
     for i, col in enumerate(HISTORY_COLS):
         c = hist_cols[i % 4]
         sym_values[col] = int(
-            c.checkbox(SYMPTOM_DISPLAY[col], key=f"hist_{col}")
+            c.checkbox(HISTORY_DISPLAY[col], key=f"hist_{col}")
         )
 
     st.markdown("")
@@ -190,8 +198,9 @@ if model_choice.startswith("🧠"):
                     ann_model, ann_features, ann_specialists, sym_values
                 )
             spec_name = SPECIALIST_NAMES.get(spec_code, spec_code)
+            all_display = {**SYMPTOM_DISPLAY, **HISTORY_DISPLAY}
             checked_labels = [
-                SYMPTOM_DISPLAY[k] for k, v in sym_values.items() if v == 1
+                all_display[k] for k, v in sym_values.items() if v == 1
             ]
 
             st.success("Prediction complete")
@@ -229,10 +238,16 @@ else:
     )
 
     try:
-        svm_pipeline = load_svm()
+        svm_pipeline, svm_accuracy = load_svm()
     except Exception as e:
         st.error(f"Could not load SVM model.\n\nError: {e}")
         st.stop()
+
+    st.warning(
+        f"**Small training set (47 Q&A pairs).** Hold-out accuracy: {svm_accuracy:.0%}. "
+        "Responses are pattern-matched, not clinically validated. "
+        "Expand `svm_data.csv` to improve reliability."
+    )
 
     # ── Chat history ───────────────────────────────────────────────────────────
     if "svm_history" not in st.session_state:
