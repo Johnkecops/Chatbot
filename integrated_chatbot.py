@@ -5,14 +5,13 @@ Combines ANN (symptom-based) and SVM (free-text Q&A) chatbots
 Author: Dr. Arli Aditya Parikesit
 """
 
-import os
-import warnings
-warnings.filterwarnings("ignore")
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 from pathlib import Path
+
+import triage
+from triage import SYMPTOM_DISPLAY, HISTORY_DISPLAY
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 ROOT    = Path(__file__).parent
@@ -32,44 +31,12 @@ SPECIALIST_NAMES = {
     "SpOT" : "Orthopedic Surgeon (SpOT)",
 }
 
-# ── Feature display names (26 ANN inputs) ─────────────────────────────────────
-SYMPTOM_DISPLAY = {
-    "Chest_discomfort"                    : "Chest Discomfort",
-    "Faint"                               : "Faint / Dizziness",
-    "Discomfort_in_shoulder_neckback_and_jaw": "Shoulder / Neck / Back / Jaw Discomfort",
-    "Shortness_of_breath"                 : "Shortness of Breath",
-    "Fractured_bone"                      : "Fractured Bone",
-    "Persistent_headache"                 : "Persistent Headache",
-    "Cuts"                                : "Cuts / Wounds",
-    "Foreign_material_stuck"              : "Foreign Material Stuck",
-    "Skin_infection"                      : "Skin Infection",
-    "Problem_with_vision"                 : "Vision Problems",
-    "Fever"                               : "Fever",
-    "Diarrhea"                            : "Diarrhea",
-    "Cold_sweat"                          : "Cold Sweat",
-    "Back_pain"                           : "Back Pain",
-    "Weakness"                            : "General Weakness",
-    "Trouble_in_speaking_seeingwalking"   : "Speech / Vision / Walking Trouble",
-    "Vomit"                               : "Vomiting",
-    "Stomachache"                         : "Stomachache",
-}
-
-HISTORY_DISPLAY = {
-    "Hypertension"                        : "Hypertension (pre-existing)",
-    "Diabetes"                            : "Diabetes (pre-existing)",
-    "Heart_disease"                       : "Heart Disease (pre-existing)",
-    "Liver_disease"                       : "Liver Disease (pre-existing)",
-    "Stroke"                              : "Stroke History",
-    "Tumor/cancer"                        : "Tumor / Cancer History",
-    "Respiration_disease"                 : "Respiratory Disease (pre-existing)",
-    "Gastric"                             : "Gastric Disease (pre-existing)",
-}
-
 SYMPTOMS_COLS = list(SYMPTOM_DISPLAY.keys())
 HISTORY_COLS  = list(HISTORY_DISPLAY.keys())
 
 
 # ── Model loaders (cached) ─────────────────────────────────────────────────────
+# Same load/predict logic as ANN_chatbot_files 1/chatbot_model.py (chatModel, used by the notebooks).
 @st.cache_resource(show_spinner="Loading ANN model…")
 def load_ann():
     import tensorflow as tf
@@ -77,32 +44,20 @@ def load_ann():
     df      = pd.read_csv(str(ANN_DIR / "data_tutorial.csv"))
     features    = list(df.iloc[:, :26].columns)
     specialists = list(df.iloc[:, -9:].columns)
+    assert features == SYMPTOMS_COLS + HISTORY_COLS, (
+        "data_tutorial.csv columns do not match the app's symptom/history lists"
+    )
     return model, features, specialists
 
 
-@st.cache_resource(show_spinner="Training SVM model on sample data…")
+@st.cache_resource(show_spinner="Training SVM model…")
 def load_svm():
-    from sklearn.svm import LinearSVC
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.pipeline import Pipeline
-    from sklearn.model_selection import train_test_split
-
-    df = pd.read_csv(str(SVM_CSV))
-    X_train, X_test, y_train, y_test = train_test_split(
-        df["question"], df["Response"], test_size=0.2, random_state=42
-    )
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(stop_words="english", ngram_range=(1, 2))),
-        ("svm",   LinearSVC(C=1.0, max_iter=2000)),
-    ])
-    pipeline.fit(X_train, y_train)
-    holdout_accuracy = pipeline.score(X_test, y_test)
-    return pipeline, holdout_accuracy
+    return triage.build_svm(SVM_CSV)
 
 
 # ── ANN prediction ─────────────────────────────────────────────────────────────
 def predict_ann(model, features, specialists, values: dict) -> tuple[str, float]:
-    row = [values.get(f, 0) for f in features]
+    row = [values[f] for f in features]
     df  = pd.DataFrame([row], columns=features)
     pred = model.predict(df, verbose=0)
     idx  = int(np.argmax(pred[0]))
@@ -197,6 +152,8 @@ if model_choice.startswith("🧠"):
                 spec_code, confidence = predict_ann(
                     ann_model, ann_features, ann_specialists, sym_values
                 )
+            for msg in triage.ann_red_flags(sym_values):
+                st.error(f"EMERGENCY WARNING: {msg}")
             spec_name = SPECIALIST_NAMES.get(spec_code, spec_code)
             all_display = {**SYMPTOM_DISPLAY, **HISTORY_DISPLAY}
             checked_labels = [
@@ -208,7 +165,12 @@ if model_choice.startswith("🧠"):
 
             with result_col:
                 st.metric("Recommended Specialist", spec_name)
-                st.metric("Model Confidence", f"{confidence:.1%}")
+                st.metric("Softmax score", f"{confidence:.1%}")
+                st.caption(
+                    "Not a probability: the model was trained with hinge loss on 111 "
+                    "cases. THT, SpKK and SpB had 1 to 3 training cases each, so those "
+                    "outputs are especially unreliable."
+                )
 
             with detail_col:
                 st.markdown("**Symptoms / History entered:**")
@@ -238,15 +200,16 @@ else:
     )
 
     try:
-        svm_pipeline, svm_accuracy = load_svm()
+        svm_pipeline, svm_cv_mean, svm_cv_sd, svm_folds = load_svm()
     except Exception as e:
         st.error(f"Could not load SVM model.\n\nError: {e}")
         st.stop()
 
     st.warning(
-        f"**Small training set (47 Q&A pairs).** Hold-out accuracy: {svm_accuracy:.0%}. "
-        "Responses are pattern-matched, not clinically validated. "
-        "Expand `svm_data.csv` to improve reliability."
+        f"**Small training set.** {svm_folds}-fold stratified CV accuracy: "
+        f"{svm_cv_mean:.0%} ± {svm_cv_sd:.0%}, measured on rephrasings of the same "
+        "questions, so it overstates performance on real users. "
+        "Responses are pattern-matched, not clinically validated."
     )
 
     # ── Chat history ───────────────────────────────────────────────────────────
@@ -262,13 +225,12 @@ else:
         submitted = st.form_submit_button("💬 Ask", type="primary", use_container_width=True)
 
     if submitted and user_input.strip():
+        text = user_input.strip()
         with st.spinner("Thinking…"):
-            answer = svm_pipeline.predict([user_input.strip()])[0]
+            answer = triage.svm_answer(svm_pipeline, text)
+        st.session_state.svm_history.append({"role": "user", "text": text})
         st.session_state.svm_history.append(
-            {"role": "user",      "text": user_input.strip()}
-        )
-        st.session_state.svm_history.append(
-            {"role": "assistant", "text": answer}
+            {"role": "assistant", "text": answer, "flags": triage.text_red_flags(text)}
         )
 
     # ── Render chat history ────────────────────────────────────────────────────
@@ -278,6 +240,8 @@ else:
                 st.write(msg["text"])
         else:
             with st.chat_message("assistant", avatar="🏥"):
+                for flag in msg["flags"]:
+                    st.error(f"EMERGENCY WARNING: {flag}")
                 st.write(msg["text"])
                 st.caption("⚠️ For informational purposes only. Consult a licensed physician.")
 

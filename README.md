@@ -8,65 +8,52 @@ Chatbot development for health service in a hospital. Uses multiple computationa
 
 ```
 Chatbot-main/
+├── integrated_chatbot.py         # Streamlit app: ANN + SVM interface
+├── triage.py                     # Streamlit-free logic: red-flag rules, SVM build/answer/reject
+├── svm_data.csv                  # 188 Q&A rows (47 responses x 4 phrasings)
+├── scripts/eval_ann.py           # Per-class ANN report (resubstitution + stratified CV)
+├── tests/test_pipeline.py        # pytest smoke tests
+├── results/tables/               # Output of eval_ann.py
 ├── ANN_chatbot_files 1/          # ANN chatbot (Python / TensorFlow)
-│   ├── ANN_Chatbot_Model.ipynb   # Notebook: load model and run predictions
-│   ├── ANN_Chatbot_Note.ipynb    # Notebook: training, testing, saving model
-│   ├── chatbot_model.py          # chatModel class — loads .h5 and predicts specialist
-│   ├── chatbot_model1.h5         # Pre-trained Keras model weights
-│   ├── data_tutorial.csv         # Training dataset (26 symptom features, 9 specialist labels)
-│   ├── instruction.txt           # Setup instructions for the ANN environment
-│   └── my_conda_env.yml          # Conda environment specification (tf-keras-chatbot)
-│
-├── SVM Chatbot File/             # SVM chatbot (original R implementation)
-│   ├── Database.r                # Build symptom/specialist reference data
-│   ├── Dataset cleaning.r        # Data cleaning pipeline
-│   ├── Divide and training data.r# Train/test split (80/20)
-│   ├── Step 1.r                  # Text preprocessing and DTM construction
-│   ├── Step 2.r                  # Build training matrix with responses
-│   ├── Step 3.r                  # Train SVM (linear kernel, cost=100)
-│   └── Step 4.r                  # Prediction function
-│
-├── integrated_chatbot.py         # Streamlit app — unified ANN + SVM interface
-├── svm_data.csv                  # Sample Q&A training data for the Python SVM model
-├── requirements_integrated.txt   # Python dependencies for the integrated app
-├── LICENSE.txt                   # License information
-└── README.md                     # This file
+│   ├── ANN_Chatbot_Note.ipynb    # Training, testing, saving model
+│   ├── ANN_Chatbot_Model.ipynb   # Load model and run predictions
+│   ├── chatbot_model.py          # chatModel class used by the notebooks
+│   ├── chatbot_model1.h5         # Trained Keras model (tracked: the app needs it to run)
+│   ├── data_tutorial.csv         # 111 cases, 26 binary features, 9 specialist labels
+│   ├── instruction.txt
+│   └── my_conda_env.yml
+├── archive/R_SVM_ICORIS2022/     # Original R SVM scripts, kept for provenance, NOT runnable as is
+└── requirements_integrated.txt
 ```
 
 ---
 
-## Integrated Streamlit Application (New)
+## Integrated Streamlit Application
 
-`integrated_chatbot.py` merges both chatbots into a single web app. Users select the model via a sidebar radio button.
+`integrated_chatbot.py` merges both chatbots. Users select the model in the sidebar.
 
-### ANN Mode — Symptom Checker
-- Input: 26 binary checkboxes (18 acute symptoms + 8 pre-existing conditions)
-- Output: recommended specialist + model confidence score
-- Backed by `chatbot_model1.h5` (TensorFlow/Keras, pre-trained)
-- Predicts one of 9 specialist categories: SpJP, SpPD, SpS, SpB, THT, SpKK, SpM, Paru, SpOT
+### ANN mode: symptom checker
+- Input: 26 binary checkboxes (18 symptoms, 8 pre-existing conditions).
+- Output: recommended specialist plus the softmax score. The score is not a probability: the model uses hinge loss and was trained on 111 cases.
+- Backed by `chatbot_model1.h5`, an MLP (240-180-120-60-9) trained in `ANN_Chatbot_Note.ipynb` on all 111 cases with no held-out set.
+- Specialists: SpJP, SpPD, SpS, SpB, THT, SpKK, SpM, Paru, SpOT.
+- Known limits: THT has 1 training case, SpB and SpKK have 3 each. `scripts/eval_ann.py` shows the shipped model scores 0 recall on THT and SpB even on its own training data.
 
-### SVM Mode — Free-Text Q&A
-- Input: plain-language question typed by the user
-- Output: matched answer from trained Q&A pairs
-- Re-implemented in Python (scikit-learn `LinearSVC` + TF-IDF) to remove the R dependency
-- Training data: `svm_data.csv` (47 medical Q&A pairs, extensible)
+### SVM mode: free-text Q&A
+- Input: plain-language question. Output: the matched answer, or a "cannot match" message when the top one-vs-rest margin is below `REJECT_MARGIN` in `triage.py`.
+- scikit-learn `LinearSVC` on TF-IDF (1-2 grams). Accuracy shown in the app is stratified 4-fold CV on rephrasings of the same questions, so it overstates performance on real users.
+- This is a Python re-implementation of the idea in the original R pipeline (TF-IDF-style term matrix plus linear SVM). It is not a numerical reproduction: the R version used raw term counts, `cost=100` and no stop-word removal, and has no published evaluation here.
 
-### Running the App
+### Emergency red flags (both modes)
+Rules in `triage.py` show an emergency banner for chest discomfort with breathlessness or fainting, and for sudden speech, vision or walking trouble. These rules and the SVM Q&A rows were approved by the project lead on 2026-10-16. They have not been reviewed by a licensed physician; do that before any clinical use.
 
+### Running
 ```bash
-# Base Anaconda environment already has all dependencies
-# tensorflow-macos 2.15.0 | streamlit 1.55.0 | scikit-learn 1.3.0
-
 cd Chatbot-main
+pip install -r requirements_integrated.txt      # tested: tensorflow 2.15.0, scikit-learn 1.8.0, streamlit 1.57.0
 streamlit run integrated_chatbot.py
-```
-
-Or, using the original ANN conda environment:
-
-```bash
-conda activate tf-keras-chatbot
-pip install streamlit scikit-learn
-streamlit run integrated_chatbot.py
+python -m pytest tests                          # smoke tests
+python scripts/eval_ann.py                      # writes results/tables/ann_*.csv
 ```
 
 ---
@@ -87,14 +74,9 @@ jupyter notebook "ANN_chatbot_files 1/ANN_Chatbot_Model.ipynb"
 
 ---
 
-## Original SVM Chatbot (R)
+## Original SVM Chatbot (R), archived
 
-The original SVM implementation is in R and requires the following packages:
-`tm`, `SnowballC`, `NLP`, `e1071`, `openxlsx`
-
-Run scripts in order: `Step 1.r` → `Step 2.r` → `Step 3.r` → `Step 4.r`
-
-The Python re-implementation in `integrated_chatbot.py` reproduces the same logic (TF-IDF vectorisation + linear SVM) without requiring an R installation.
+`archive/R_SVM_ICORIS2022/` holds the scripts behind the ICORIS 2022 paper. They are not runnable as shipped (missing input file, wrong package name `snowballC`, `tm` never loaded, `Database.r` does not produce the `question`/`Response` columns that `Step 1.r` needs). Fix those before reuse.
 
 ---
 
@@ -128,4 +110,6 @@ Shiloputra, A. F., Darmawan, J. T., Zahra, S. L., Sugiharto, S., Pricillia, V., 
 
 This tool is for **research and educational purposes only**. It does not constitute medical advice and must not be used as a substitute for professional clinical judgment.
 
-**AI Assistance Disclaimer**: This codebase was developed with the assistance of Claude Code. While the AI provided code generation, debugging, and structural support, the human developer maintains full responsibility for reviewing, testing, and maintaining all content and functionality.
+---
+
+AI Assistance Disclaimer: This codebase was developed with the assistance of Claude Code. While the AI provided code generation, debugging, and structural support, the human developer maintains full responsibility for reviewing, testing, and maintaining all content and functionality
