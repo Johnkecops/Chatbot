@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Keras native format (the legacy .h5 shipped with the app is tracked on purpose)
+*.keras
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# R outputs
+output.xlsx
+
+# Env
+.env
+
+# graphify / pytest caches
+graphify-out/
+.pytest_cache/
+
+# Local tooling (also ignored globally on the author machine)
+.claude/settings.local.json
+.code-review-graph/
+MEMORY.md
+ERRORS.md

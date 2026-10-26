@@ -64,9 +64,10 @@ ANN_RED_FLAGS = [
     ({"Trouble_in_speaking_seeingwalking"}, set(), STROKE),
 ]
 
+# \A anchors the lookaheads: unanchored, search() retries them at every offset (O(n^2) on long input)
 TEXT_RED_FLAGS = [
-    (re.compile(r"(?=.*\bchest\b)(?=.*\b(breath|breathing|faint|fainting)\b)", re.I | re.S), CARDIAC),
-    (re.compile(r"(?=.*\b(trouble|difficulty|unable|cannot|can't|hardly)\b)"
+    (re.compile(r"\A(?=.*\bchest\b)(?=.*\b(breath|breathing|faint|fainting)\b)", re.I | re.S), CARDIAC),
+    (re.compile(r"\A(?=.*\b(trouble|difficulty|unable|cannot|can't|hardly)\b)"
                 r"(?=.*\b(speak|speaking|talking|walk|walking|seeing)\b)|slurred", re.I | re.S), STROKE),
     (re.compile(r"can'?t breathe|cannot breathe", re.I), CARDIAC),
 ]

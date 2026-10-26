@@ -38,6 +38,13 @@ def test_text_red_flags(text, flagged):
     assert bool(triage.text_red_flags(text)) == flagged
 
 
+def test_text_red_flags_linear_on_long_input():
+    import time
+    t = time.perf_counter()
+    triage.text_red_flags("chest " + "x " * 50_000)
+    assert time.perf_counter() - t < 0.5
+
+
 @pytest.fixture(scope="module")
 def svm():
     return triage.build_svm(ROOT / "svm_data.csv")

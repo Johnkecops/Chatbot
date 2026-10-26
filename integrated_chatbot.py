@@ -5,6 +5,8 @@ Combines ANN (symptom-based) and SVM (free-text Q&A) chatbots
 Author: Dr. Arli Aditya Parikesit
 """
 
+import traceback
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -114,10 +116,11 @@ if model_choice.startswith("🧠"):
 
     try:
         ann_model, ann_features, ann_specialists = load_ann()
-    except Exception as e:
+    except Exception:
+        traceback.print_exc()  # details to the server console, not the browser
         st.error(
-            f"Could not load ANN model. Make sure `chatbot_model1.h5` and "
-            f"`data_tutorial.csv` are inside `ANN_chatbot_files 1/`.\n\nError: {e}"
+            "Could not load ANN model. Make sure `chatbot_model1.h5` and "
+            "`data_tutorial.csv` are inside `ANN_chatbot_files 1/`."
         )
         st.stop()
 
@@ -201,8 +204,9 @@ else:
 
     try:
         svm_pipeline, svm_cv_mean, svm_cv_sd, svm_folds = load_svm()
-    except Exception as e:
-        st.error(f"Could not load SVM model.\n\nError: {e}")
+    except Exception:
+        traceback.print_exc()
+        st.error("Could not load SVM model.")
         st.stop()
 
     st.warning(
@@ -220,6 +224,7 @@ else:
     with st.form("svm_form", clear_on_submit=True):
         user_input = st.text_input(
             "Your question",
+            max_chars=500,
             placeholder="e.g. I have chest pain and shortness of breath, which doctor should I see?",
         )
         submitted = st.form_submit_button("💬 Ask", type="primary", use_container_width=True)

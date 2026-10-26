@@ -1,3 +1,5 @@
+# LEGACY: reproduces the 2022 notebooks only (Python 3.6, EOL packages with known advisories).
+# Do not use for the Streamlit app; use requirements_integrated.txt instead.
 name: tf-keras-chatbot
 channels:
   - anaconda
@@ -184,4 +186,3 @@ dependencies:
   - zstd=1.4.9=h19a0ad4_0
   - pip:
     - fast-autocomplete==0.9.0
-prefix: C:\Users\Hp Pavilion\.conda\envs\tf-keras-gpu

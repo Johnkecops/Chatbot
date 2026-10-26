@@ -1,0 +1,3 @@
+[client]
+# Public deployment: tracebacks and exception details go to the server console only
+showErrorDetails = "none"
